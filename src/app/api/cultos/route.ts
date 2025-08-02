@@ -7,11 +7,11 @@ export async function POST(request: NextRequest) {
     const novoCulto = await request.json();
     
     // Ler o arquivo JSON atual
-    const dataPath = join(process.cwd(), 'src', 'data', 'agenda-louvores.json');
+    const dataPath = join(process.cwd(), 'public', 'data', 'agenda-louvores.json');
     const data = JSON.parse(readFileSync(dataPath, 'utf8'));
     
     // Gerar novo ID
-    const novoId = Math.max(...data.cultos.map((culto: any) => culto.id)) + 1;
+    const novoId = Math.max(...data.cultos.map((culto: { id: number }) => culto.id)) + 1;
     
     // Adicionar o novo culto
     const cultoCompleto = {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const dataPath = join(process.cwd(), 'src', 'data', 'agenda-louvores.json');
+    const dataPath = join(process.cwd(), 'public', 'data', 'agenda-louvores.json');
     const data = JSON.parse(readFileSync(dataPath, 'utf8'));
     
     return NextResponse.json(data.cultos);

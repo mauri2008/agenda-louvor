@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Music, Users, Mic, Clock, Guitar, Drum, Piano, Guitar as Bass, Plus, ExternalLink, Search, X } from "lucide-react";
-import dadosAgenda from "@/data/agenda-louvores.json";
+import dadosAgenda from "../../public/data/agenda-louvores.json";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 
@@ -257,7 +257,7 @@ export default function Home() {
                               Tom: {louvor.tom}
                             </Badge>
                             <div className="flex gap-2">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- O tipo do louvor pode variar dependendo da fonte dos dados */}
                               {(louvor as any).linkLouvor && (
                                 <Button
                                   size="sm"
@@ -269,7 +269,7 @@ export default function Home() {
                                   <ExternalLink className="h-4 w-4" />
                                 </Button>
                               )}
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- O tipo do louvor pode variar dependendo da fonte dos dados */}
                               {(louvor as any).linkCifra && (
                                 <Button
                                   size="sm"

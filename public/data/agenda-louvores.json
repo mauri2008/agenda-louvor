@@ -402,6 +402,72 @@
                 }
             ],
             "id": 6
+        },
+        {
+            "data": "2025-08-02",
+            "diaSemana": "Segunda",
+            "horario": "14:28",
+            "tipo": "Outros",
+            "status": "agendado",
+            "cantores": [
+                {
+                    "nome": "Marcela",
+                    "funcao": "Vocal Principal",
+                    "id": 1754155596227
+                }
+            ],
+            "banda": {
+                "instrumentos": [
+                    {
+                        "id": 1754155604778,
+                        "instrumento": "Teclado",
+                        "musico": "mauri "
+                    }
+                ]
+            },
+            "louvores": [
+                {
+                    "nome": "Com muit louvor ",
+                    "tom": "C",
+                    "duracao": "4:20",
+                    "categoria": "Louvor",
+                    "linkLouvor": "",
+                    "linkCifra": "",
+                    "tipoLink": "youtube",
+                    "id": 1754155629539,
+                    "letra": "",
+                    "status": "ativo"
+                }
+            ],
+            "novosLouvores": [
+                {
+                    "id": 1754155629539,
+                    "nome": "Com muit louvor ",
+                    "tom": "C",
+                    "duracao": "4:20",
+                    "categoria": "Louvor",
+                    "letra": "",
+                    "status": "ativo",
+                    "linkLouvor": "",
+                    "linkCifra": "",
+                    "tipoLink": "youtube"
+                }
+            ],
+            "novosCantores": [
+                {
+                    "id": 1754155596227,
+                    "nome": "Marcela",
+                    "funcao": "Vocal Principal"
+                }
+            ],
+            "novosMusicos": [
+                {
+                    "id": 1754155604778,
+                    "nome": "mauri ",
+                    "funcao": "Teclado"
+                }
+            ],
+            "id": 7
         }
     ],
     "membros": {

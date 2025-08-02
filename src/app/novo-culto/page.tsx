@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Music, Users, Mic, Plus, X, Save, Search, Check, ArrowLeft } from "lucide-react";
-import dadosAgenda from "@/data/agenda-louvores.json";
+import dadosAgenda from "../../../public/data/agenda-louvores.json";
 
 interface Cantor {
     id: number;
@@ -43,9 +43,9 @@ interface FormData {
         instrumentos: Instrumento[];
     };
     louvores: Louvor[];
-    novosLouvores?: any[];
-    novosCantores?: any[];
-    novosMusicos?: any[];
+    novosLouvores?: Louvor[];
+    novosCantores?: Cantor[];
+    novosMusicos?: { id: number; nome: string; funcao: string }[];
 }
 
 export default function NovoCulto() {
@@ -89,7 +89,7 @@ export default function NovoCulto() {
     // Estados para autocomplete de músicos
     const [searchTermMusico, setSearchTermMusico] = useState("");
     const [showSuggestionsMusico, setShowSuggestionsMusico] = useState(false);
-    const [suggestionsMusico, setSuggestionsMusico] = useState<any[]>([]);
+    const [suggestionsMusico, setSuggestionsMusico] = useState<{ id: number; nome: string; funcao: string }[]>([]);
     const [selectedSuggestionIndexMusico, setSelectedSuggestionIndexMusico] = useState(-1);
 
     const instrumentosDisponiveis = ["Guitarra", "Bateria", "Violão 1", "Violão 2", "Teclado", "Contra Baixo"];
@@ -174,7 +174,7 @@ export default function NovoCulto() {
     };
 
     // Função para selecionar um músico da sugestão
-    const selecionarMusico = (musico: any) => {
+    const selecionarMusico = (musico: { id: number; nome: string; funcao: string }) => {
         setNovoInstrumento({
             instrumento: novoInstrumento.instrumento,
             musico: musico.nome
@@ -492,14 +492,12 @@ export default function NovoCulto() {
                     l => l.nome.toLowerCase() === louvor.nome.toLowerCase()
                 );
                 if (!louvorExistente) {
-                    (dadosParaSalvar.novosLouvores as any[]).push({
+                    (dadosParaSalvar.novosLouvores as Louvor[]).push({
                         id: louvor.id,
                         nome: louvor.nome,
                         tom: louvor.tom,
                         duracao: louvor.duracao,
                         categoria: louvor.categoria,
-                        letra: "",
-                        status: "ativo",
                         linkLouvor: louvor.linkLouvor || "",
                         linkCifra: louvor.linkCifra || "",
                         tipoLink: louvor.tipoLink || "youtube"
@@ -513,7 +511,7 @@ export default function NovoCulto() {
                     c => c.nome.toLowerCase() === cantor.nome.toLowerCase()
                 );
                 if (!cantorExistente) {
-                    (dadosParaSalvar.novosCantores as any[]).push({
+                    (dadosParaSalvar.novosCantores as Cantor[]).push({
                         id: cantor.id,
                         nome: cantor.nome,
                         funcao: cantor.funcao
@@ -527,7 +525,7 @@ export default function NovoCulto() {
                     m => m.nome.toLowerCase() === instrumento.musico.toLowerCase()
                 );
                 if (!musicoExistente) {
-                    (dadosParaSalvar.novosMusicos as any[]).push({
+                    (dadosParaSalvar.novosMusicos as { id: number; nome: string; funcao: string }[]).push({
                         id: instrumento.id,
                         nome: instrumento.musico,
                         funcao: instrumento.instrumento
