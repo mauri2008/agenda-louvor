@@ -173,7 +173,7 @@ export default function Home() {
                       <div>
                         <CardTitle className="text-xl font-bold text-foreground mb-1"> {culto.tipo}</CardTitle>
                         <CardDescription className="text-sm text-muted-foreground flex items-center gap-2">
-                          <span className="font-medium">{culto.diaSemana}</span>
+                          <span className="font-medium">{culto.dia_semana}</span>
                           <span>•</span>
                           <span>{new Date(culto.data).toLocaleDateString('pt-BR', {
                             day: '2-digit',
