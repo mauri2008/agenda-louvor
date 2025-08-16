@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,8 +50,9 @@ interface FormData {
 
 export default function NovoCulto() {
     const { louvores, cantores, musicos, searchLouvores, searchCantores, searchMusicos } = useAgendaData();
+    const [isClient, setIsClient] = useState(false);
     
-    const [formData, setFormData] = useState<FormData>({
+    const [formData, setFormData] = useState<FormData>(() => ({
         data: "",
         diaSemana: "",
         horario: "",
@@ -62,37 +63,37 @@ export default function NovoCulto() {
             instrumentos: []
         },
         louvores: []
-    });
+    }));
 
-    const [novoCantor, setNovoCantor] = useState({ nome: "", funcao: "Vocal Principal" });
-    const [novoInstrumento, setNovoInstrumento] = useState({ instrumento: "", musico: "" });
-    const [novoLouvor, setNovoLouvor] = useState({
-        nome: "",
-        tom: "",
-        duracao: "",
-        categoria: "Louvor",
-        linkLouvor: "",
-        linkCifra: "",
-        tipoLink: "youtube"
-    });
+    // Garantir que o componente só renderize no cliente
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    // Estados para seleção de cantores, músicos e louvores
+    const [selectedCantor, setSelectedCantor] = useState<Cantor | null>(null);
+    const [selectedMusico, setSelectedMusico] = useState<{ id: number; nome: string; funcao: string } | null>(null);
+    const [selectedLouvor, setSelectedLouvor] = useState<Louvor | null>(null);
+    const [selectedInstrumento, setSelectedInstrumento] = useState("");
 
     // Estados para autocomplete de louvores
     const [searchTerm, setSearchTerm] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [suggestions, setSuggestions] = useState<Louvor[]>([]);
+    const [suggestions, setSuggestions] = useState<Louvor[]>(() => []);
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
     // Estados para autocomplete de cantores
     const [searchTermCantor, setSearchTermCantor] = useState("");
     const [showSuggestionsCantor, setShowSuggestionsCantor] = useState(false);
-    const [suggestionsCantor, setSuggestionsCantor] = useState<Cantor[]>([]);
+    const [suggestionsCantor, setSuggestionsCantor] = useState<Cantor[]>(() => []);
     const [selectedSuggestionIndexCantor, setSelectedSuggestionIndexCantor] = useState(-1);
 
     // Estados para autocomplete de músicos
     const [searchTermMusico, setSearchTermMusico] = useState("");
     const [showSuggestionsMusico, setShowSuggestionsMusico] = useState(false);
-    const [suggestionsMusico, setSuggestionsMusico] = useState<{ id: number; nome: string; funcao: string }[]>([]);
+    const [suggestionsMusico, setSuggestionsMusico] = useState<{ id: number; nome: string; funcao: string }[]>(() => []);
     const [selectedSuggestionIndexMusico, setSelectedSuggestionIndexMusico] = useState(-1);
+    const [instrumentoIdCounter, setInstrumentoIdCounter] = useState(1);
 
     const instrumentosDisponiveis = ["Guitarra", "Bateria", "Violão 1", "Violão 2", "Teclado", "Contra Baixo"];
     const categorias = ["Adoração", "Louvor", "Hino"];
@@ -139,15 +140,7 @@ export default function NovoCulto() {
 
     // Função para selecionar um louvor da sugestão
     const selecionarLouvor = (louvor: Louvor) => {
-        setNovoLouvor({
-            nome: louvor.nome,
-            tom: louvor.tom,
-            duracao: louvor.duracao,
-            categoria: louvor.categoria,
-            linkLouvor: louvor.linkLouvor || "",
-            linkCifra: louvor.linkCifra || "",
-            tipoLink: louvor.tipoLink || "youtube"
-        });
+        setSelectedLouvor(louvor);
         setSearchTerm(louvor.nome);
         setShowSuggestions(false);
         setSuggestions([]);
@@ -156,10 +149,7 @@ export default function NovoCulto() {
 
     // Função para selecionar um cantor da sugestão
     const selecionarCantor = (cantor: Cantor) => {
-        setNovoCantor({
-            nome: cantor.nome,
-            funcao: cantor.funcao
-        });
+        setSelectedCantor(cantor);
         setSearchTermCantor(cantor.nome);
         setShowSuggestionsCantor(false);
         setSuggestionsCantor([]);
@@ -168,10 +158,7 @@ export default function NovoCulto() {
 
     // Função para selecionar um músico da sugestão
     const selecionarMusico = (musico: { id: number; nome: string; funcao: string }) => {
-        setNovoInstrumento({
-            instrumento: novoInstrumento.instrumento,
-            musico: musico.nome
-        });
+        setSelectedMusico(musico);
         setSearchTermMusico(musico.nome);
         setShowSuggestionsMusico(false);
         setSuggestionsMusico([]);
@@ -181,7 +168,6 @@ export default function NovoCulto() {
     // Função para lidar com mudanças no campo de busca
     const handleSearchChange = async (value: string) => {
         setSearchTerm(value);
-        setNovoLouvor(prev => ({ ...prev, nome: value }));
 
         if (value.trim()) {
             await buscarLouvores(value);
@@ -195,7 +181,6 @@ export default function NovoCulto() {
     // Função para lidar com mudanças no campo de busca de cantores
     const handleSearchChangeCantor = async (value: string) => {
         setSearchTermCantor(value);
-        setNovoCantor(prev => ({ ...prev, nome: value }));
 
         if (value.trim()) {
             await buscarCantores(value);
@@ -209,7 +194,6 @@ export default function NovoCulto() {
     // Função para lidar com mudanças no campo de busca de músicos
     const handleSearchChangeMusico = async (value: string) => {
         setSearchTermMusico(value);
-        setNovoInstrumento(prev => ({ ...prev, musico: value }));
 
         if (value.trim()) {
             await buscarMusicos(value);
@@ -307,38 +291,16 @@ export default function NovoCulto() {
         }
     };
 
-    // Função para adicionar novo louvor (seja existente ou novo)
+    // Função para adicionar louvor selecionado
     const adicionarLouvor = () => {
-        if (novoLouvor.nome && novoLouvor.tom) {
-            // Se o louvor não existe na base, criar um novo
-            const louvorExistente = louvores.find(
-                l => l.nome.toLowerCase() === novoLouvor.nome.toLowerCase()
-            );
-
-            const louvorParaAdicionar = louvorExistente
-                ? { ...louvorExistente, id: Date.now() }
-                : {
-                    ...novoLouvor,
-                    id: Date.now(),
-                    letra: "",
-                    status: "ativo"
-                };
-
+        if (selectedLouvor) {
             setFormData(prev => ({
                 ...prev,
-                louvores: [...prev.louvores, louvorParaAdicionar]
+                louvores: [...prev.louvores, selectedLouvor]
             }));
 
-            // Limpar campos
-            setNovoLouvor({
-                nome: "",
-                tom: "",
-                duracao: "",
-                categoria: "Louvor",
-                linkLouvor: "",
-                linkCifra: "",
-                tipoLink: "youtube"
-            });
+            // Limpar seleção
+            setSelectedLouvor(null);
             setSearchTerm("");
             setShowSuggestions(false);
             setSuggestions([]);
@@ -347,21 +309,12 @@ export default function NovoCulto() {
     };
 
     const adicionarCantor = () => {
-        if (novoCantor.nome.trim()) {
-            // Se o cantor não existe na base, criar um novo
-            const cantorExistente = cantores.find(
-                c => c.nome.toLowerCase() === novoCantor.nome.toLowerCase()
-            );
-
-            const cantorParaAdicionar = cantorExistente
-                ? { ...cantorExistente, id: Date.now() }
-                : { ...novoCantor, id: Date.now() };
-
+        if (selectedCantor) {
             setFormData(prev => ({
                 ...prev,
-                cantores: [...prev.cantores, cantorParaAdicionar]
+                cantores: [...prev.cantores, selectedCantor]
             }));
-            setNovoCantor({ nome: "", funcao: "Vocal Principal" });
+            setSelectedCantor(null);
             setSearchTermCantor("");
             setShowSuggestionsCantor(false);
             setSuggestionsCantor([]);
@@ -377,16 +330,11 @@ export default function NovoCulto() {
     };
 
     const adicionarInstrumento = () => {
-        if (novoInstrumento.instrumento && novoInstrumento.musico) {
-            // Se o músico não existe na base, criar um novo
-            const musicoExistente = musicos.find(
-                m => m.nome.toLowerCase() === novoInstrumento.musico.toLowerCase()
-            );
-
+        if (selectedMusico && selectedInstrumento) {
             const instrumentoParaAdicionar = {
-                id: Date.now(),
-                instrumento: novoInstrumento.instrumento,
-                musico: novoInstrumento.musico
+                id: instrumentoIdCounter,
+                instrumento: selectedInstrumento,
+                musico: selectedMusico.nome
             };
 
             setFormData(prev => ({
@@ -396,7 +344,9 @@ export default function NovoCulto() {
                     instrumentos: [...prev.banda.instrumentos, instrumentoParaAdicionar]
                 }
             }));
-            setNovoInstrumento({ instrumento: "", musico: "" });
+            setInstrumentoIdCounter(prev => prev + 1);
+            setSelectedMusico(null);
+            setSelectedInstrumento("");
             setSearchTermMusico("");
             setShowSuggestionsMusico(false);
             setSuggestionsMusico([]);
@@ -423,92 +373,29 @@ export default function NovoCulto() {
 
     const salvarCulto = async () => {
         if (!formData.data || !formData.horario || formData.cantores.length === 0 || formData.banda.instrumentos.length === 0 || formData.louvores.length === 0) {
-            alert("Por favor, preencha todos os campos obrigatórios!");
+            if (typeof window !== 'undefined') {
+                alert("Por favor, preencha todos os campos obrigatórios!");
+            }
             return;
         }
 
         try {
-            // Preparar dados para salvar incluindo novos louvores, cantores e músicos
-            const dadosParaSalvar = {
-                ...formData,
-                novosLouvores: [], // Será preenchido com louvores que não existem na base
-                novosCantores: [], // Será preenchido com cantores que não existem na base
-                novosMusicos: []   // Será preenchido com músicos que não existem na base
-            };
-
-            // Verificar louvores novos
-            formData.louvores.forEach(louvor => {
-                const louvorExistente = louvores.find(
-                    l => l.nome.toLowerCase() === louvor.nome.toLowerCase()
-                );
-                if (!louvorExistente) {
-                    (dadosParaSalvar.novosLouvores as Louvor[]).push({
-                        id: louvor.id,
-                        nome: louvor.nome,
-                        tom: louvor.tom,
-                        duracao: louvor.duracao,
-                        categoria: louvor.categoria,
-                        linkLouvor: louvor.linkLouvor || "",
-                        linkCifra: louvor.linkCifra || "",
-                        tipoLink: louvor.tipoLink || "youtube"
-                    });
-                }
-            });
-
-            // Verificar cantores novos
-            formData.cantores.forEach(cantor => {
-                const cantorExistente = cantores.find(
-                    c => c.nome.toLowerCase() === cantor.nome.toLowerCase()
-                );
-                if (!cantorExistente) {
-                    (dadosParaSalvar.novosCantores as Cantor[]).push({
-                        id: cantor.id,
-                        nome: cantor.nome,
-                        funcao: cantor.funcao
-                    });
-                }
-            });
-
-            // Verificar músicos novos
-            formData.banda.instrumentos.forEach(instrumento => {
-                const musicoExistente = musicos.find(
-                    m => m.nome.toLowerCase() === instrumento.musico.toLowerCase()
-                );
-                if (!musicoExistente) {
-                    (dadosParaSalvar.novosMusicos as { id: number; nome: string; funcao: string }[]).push({
-                        id: instrumento.id,
-                        nome: instrumento.musico,
-                        funcao: instrumento.instrumento
-                    });
-                }
-            });
-
+            if (typeof window === 'undefined') return;
+            
             const response = await fetch('/api/cultos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(dadosParaSalvar),
+                body: JSON.stringify(formData),
             });
 
             const result = await response.json();
 
             if (result.success) {
-                alert("Culto salvo com sucesso!");
-
-                // Mostrar informações sobre novos dados adicionados
-                let mensagem = "Culto salvo com sucesso!";
-                if (dadosParaSalvar.novosLouvores.length > 0) {
-                    mensagem += `\n\n${dadosParaSalvar.novosLouvores.length} novo(s) louvor(es) adicionado(s) à base de dados.`;
+                if (typeof window !== 'undefined') {
+                    alert("Culto salvo com sucesso!");
                 }
-                if (dadosParaSalvar.novosCantores.length > 0) {
-                    mensagem += `\n${dadosParaSalvar.novosCantores.length} novo(s) cantor(es) adicionado(s) à base de dados.`;
-                }
-                if (dadosParaSalvar.novosMusicos.length > 0) {
-                    mensagem += `\n${dadosParaSalvar.novosMusicos.length} novo(s) músico(s) adicionado(s) à base de dados.`;
-                }
-
-                alert(mensagem);
 
                 // Limpar formulário
                 setFormData({
@@ -524,42 +411,72 @@ export default function NovoCulto() {
                     louvores: []
                 });
             } else {
-                alert("Erro ao salvar culto: " + result.message);
+                if (typeof window !== 'undefined') {
+                    alert("Erro ao salvar culto: " + result.message);
+                }
             }
         } catch (error) {
-            console.error('Erro ao salvar:', error);
-            alert("Erro ao salvar culto. Tente novamente.");
+            if (typeof window !== 'undefined') {
+                console.error('Erro ao salvar:', error);
+                alert("Erro ao salvar culto. Tente novamente.");
+            }
         }
     };
+
+    // Não renderizar nada até estar no cliente
+    if (!isClient) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                            <p className="text-muted-foreground">Carregando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
-                <header className="mb-8">
+                <header className="mb-6">
                     {/* Botão Voltar */}
-                    <div className="mb-6">
+                    <div className="mb-4">
                         <Button
                             variant="ghost"
-                            onClick={() => window.history.back()}
-                            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                            onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                    window.history.back();
+                                }
+                            }}
+                            className="flex items-center gap-2 text-muted-foreground hover:text-foreground h-9 px-3"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            Voltar
+                            <span className="hidden sm:inline">Voltar</span>
                         </Button>
                     </div>
 
                     {/* Título Centralizado */}
                     <div className="text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
-                            <Calendar className="h-8 w-8 text-primary" />
+                        <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-4">
+                            <Calendar className="h-6 w-6 text-primary" />
                         </div>
-                        <h1 className="text-4xl font-bold text-foreground mb-3">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                             Novo Culto
                         </h1>
-                        <p className="text-muted-foreground text-lg">
+                        <p className="text-muted-foreground text-sm sm:text-base">
                             Cadastre um novo culto na agenda de louvores
                         </p>
+                        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                                💡 <strong>Dica:</strong> Primeiro cadastre cantores, músicos e louvores na seção "Cadastros" 
+                                para facilitar a criação de cultos.
+                            </p>
+                        </div>
                     </div>
                 </header>
 
@@ -668,7 +585,11 @@ export default function NovoCulto() {
                                         }}
                                         onBlur={() => {
                                             // Delay para permitir cliques nas sugestões
-                                            setTimeout(() => setShowSuggestionsCantor(false), 200);
+                                            setTimeout(() => {
+                                                if (!showSuggestionsCantor) {
+                                                    setShowSuggestionsCantor(false);
+                                                }
+                                            }, 150);
                                         }}
                                         className="pl-10"
                                     />
@@ -682,7 +603,12 @@ export default function NovoCulto() {
                                                 key={cantor.id}
                                                 className={`px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-between ${index === selectedSuggestionIndexCantor ? 'bg-gray-100 dark:bg-gray-700' : ''
                                                     }`}
-                                                onClick={() => selecionarCantor(cantor)}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    selecionarCantor(cantor);
+                                                }}
+                                                onMouseDown={(e) => e.preventDefault()} // Previne blur do input
                                             >
                                                 <div>
                                                     <div className="font-medium">{cantor.nome}</div>
@@ -698,19 +624,17 @@ export default function NovoCulto() {
                             </div>
 
                             <div className="flex gap-2">
-                                <Select value={novoCantor.funcao} onValueChange={(value) => setNovoCantor(prev => ({ ...prev, funcao: value }))}>
-                                    <SelectTrigger className="w-40">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {funcoesCantor.map(funcao => (
-                                            <SelectItem key={funcao} value={funcao}>{funcao}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Button size="sm" onClick={adicionarCantor}>
+                                <Button size="sm" onClick={adicionarCantor} disabled={!selectedCantor}>
                                     <Plus className="h-4 w-4" />
+                                    Adicionar Cantor
                                 </Button>
+                                {selectedCantor && (
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-md text-sm">
+                                        <Check className="h-4 w-4" />
+                                        {selectedCantor.nome} selecionado
+                                    </div>
+                                )}
+
                             </div>
 
                             <div className="space-y-2">
@@ -742,7 +666,7 @@ export default function NovoCulto() {
 
                             <div className="space-y-2">
                                 <Label>Instrumentos</Label>
-                                <div className="flex items-center gap-2">
+                                <div className="space-y-3">
                                     <div className="relative">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -762,9 +686,9 @@ export default function NovoCulto() {
                                             className="pl-10"
                                         />
                                     </div>
-                                    <Select value={novoInstrumento.instrumento} onValueChange={(value) => setNovoInstrumento(prev => ({ ...prev, instrumento: value }))}>
+                                    <Select value={selectedInstrumento} onValueChange={setSelectedInstrumento}>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Instrumento" />
+                                            <SelectValue placeholder="Selecione o instrumento" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {instrumentosDisponiveis.map(instrumento => (
@@ -772,8 +696,9 @@ export default function NovoCulto() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <Button size="sm" className="w-20" onClick={adicionarInstrumento}>
-                                        <Plus className="h-4 w-4" />
+                                    <Button size="sm" onClick={adicionarInstrumento} disabled={!selectedMusico || !selectedInstrumento}>
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Adicionar Músico
                                     </Button>
                                 </div>
 
@@ -889,64 +814,7 @@ export default function NovoCulto() {
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                                <Input
-                                    placeholder="Tom (ex: C, D, G)"
-                                    value={novoLouvor.tom}
-                                    onChange={(e) => setNovoLouvor(prev => ({ ...prev, tom: e.target.value }))}
-                                />
-                                <Input
-                                    placeholder="Duração (ex: 4:30)"
-                                    value={novoLouvor.duracao}
-                                    onChange={(e) => setNovoLouvor(prev => ({ ...prev, duracao: e.target.value }))}
-                                />
-                            </div>
-                            <div>
-                                <Select value={novoLouvor.categoria} onValueChange={(value) => setNovoLouvor(prev => ({ ...prev, categoria: value }))}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categorias.map(categoria => (
-                                            <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Links do Louvor */}
-                            <div className="space-y-3">
-                                <Label className="text-sm font-medium">Links do Louvor (Opcional)</Label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <Select value={novoLouvor.tipoLink} onValueChange={(value) => setNovoLouvor(prev => ({ ...prev, tipoLink: value }))}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {tiposLink.map(tipo => (
-                                                <SelectItem key={tipo.value} value={tipo.value}>
-                                                    <span className="flex items-center gap-2">
-                                                        <span>{tipo.icon}</span>
-                                                        {tipo.label}
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <Input
-                                        placeholder="Link do louvor"
-                                        value={novoLouvor.linkLouvor}
-                                        onChange={(e) => setNovoLouvor(prev => ({ ...prev, linkLouvor: e.target.value }))}
-                                        className="col-span-2"
-                                    />
-                                </div>
-                                <Input
-                                    placeholder="Link da cifra (opcional)"
-                                    value={novoLouvor.linkCifra}
-                                    onChange={(e) => setNovoLouvor(prev => ({ ...prev, linkCifra: e.target.value }))}
-                                />
-                            </div>
-                            <Button onClick={adicionarLouvor} className="w-full">
+                            <Button onClick={adicionarLouvor} disabled={!selectedLouvor} className="w-full">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Adicionar Louvor
                             </Button>

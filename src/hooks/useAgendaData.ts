@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Culto, Louvor, Cantor, Musico } from '@/types/database';
 
 export const useAgendaData = () => {
-  const [cultos, setCultos] = useState<Culto[]>([]);
-  const [louvores, setLouvores] = useState<Louvor[]>([]);
-  const [cantores, setCantores] = useState<Cantor[]>([]);
-  const [musicos, setMusicos] = useState<Musico[]>([]);
+  const [cultos, setCultos] = useState<Culto[]>(() => []);
+  const [louvores, setLouvores] = useState<Louvor[]>(() => []);
+  const [cantores, setCantores] = useState<Cantor[]>(() => []);
+  const [musicos, setMusicos] = useState<Musico[]>(() => []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

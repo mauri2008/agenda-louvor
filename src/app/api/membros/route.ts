@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
       const musicos = await membrosService.getMusicos();
       membros = { cantores, musicos };
     }
-
     return NextResponse.json(membros);
   } catch (error) {
     console.error('Erro ao buscar membros:', error);

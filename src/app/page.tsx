@@ -70,44 +70,88 @@ export default function Home() {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 relative">
+      <div className="max-w-7xl mx-auto px-4 py-4 relative">
         {/* Header */}
-        <header className="flex items-center justify-between mb-8 max-h-[120px] py-4 px-6 bg-card/50 border-b border-border/50">
-          {/* Left side - Icon and Title */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full shadow-lg">
-              <Music className="h-6 w-6 text-primary" />
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50 mb-6">
+          <div className="flex items-center justify-between py-3 px-4">
+            {/* Left side - Icon and Title */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full shadow-sm">
+                <Music className="h-5 w-5 text-primary" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Agenda de Louvores
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Organize e gerencie os cultos
+                </p>
+              </div>
+              <div className="sm:hidden">
+                <h1 className="text-base font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Agenda
+                </h1>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Agenda de Louvores
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Organize e gerencie os cultos da sua igreja
-              </p>
-            </div>
-          </div>
 
-          {/* Right side - Action buttons */}
-          <div className="flex items-center gap-3">
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-            </Button>
-            <Link href="/novo-culto">
+            {/* Right side - Action buttons */}
+            <div className="flex items-center gap-2">
               <Button
-                size="lg"
-                className="px-6 py-2 text-base shadow-lg hover:shadow-xl transition-all duration-300"
+                size="sm"
+                variant="ghost"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="h-9 w-9 p-0"
+                title="Atualizar"
               >
-                <Plus className="h-5 w-5 mr-2" />
-                Novo Culto
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               </Button>
-            </Link>
+              
+              <div className="hidden md:flex items-center gap-2">
+                <Link href="/cadastros">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-3 text-sm"
+                  >
+                    <Users className="h-4 w-4 mr-1" />
+                    Cadastros
+                  </Button>
+                </Link>
+                <Link href="/novo-culto">
+                  <Button
+                    size="sm"
+                    className="h-9 px-3 text-sm"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Novo Culto
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Mobile menu */}
+              <div className="md:hidden flex items-center gap-1">
+                <Link href="/cadastros">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-9 w-9 p-0"
+                    title="Cadastros"
+                  >
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/novo-culto">
+                  <Button
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    title="Novo Culto"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </header>
 

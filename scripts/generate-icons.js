@@ -31,3 +31,4 @@ console.log('Você pode usar ferramentas online para converter o SVG para PNG se
 console.log('- https://convertio.co/svg-png/');
 console.log('- https://cloudconvert.com/svg-to-png');
 console.log('- https://www.svgviewer.dev/');
+
