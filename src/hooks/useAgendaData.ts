@@ -99,6 +99,23 @@ export const useAgendaData = () => {
     };
 
     loadData();
+
+    // Refresh automático a cada 30 segundos
+    const interval = setInterval(() => {
+      fetchCultosFuturos();
+    }, 30000);
+
+    // Refresh quando a página ganha foco (útil para PWA)
+    const handleFocus = () => {
+      fetchCultosFuturos();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return {

@@ -69,12 +69,32 @@ export default function RootLayout({
                   navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
                       console.log('SW registered: ', registration);
+                      
+                      // Verifica se há uma nova versão do Service Worker
+                      registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Nova versão disponível
+                            console.log('Nova versão disponível');
+                            // Força atualização da página
+                            window.location.reload();
+                          }
+                        });
+                      });
                     })
                     .catch(function(registrationError) {
                       console.log('SW registration failed: ', registrationError);
                     });
                 });
               }
+              
+              // Força atualização quando a página ganha foco (útil para PWA)
+              window.addEventListener('focus', function() {
+                if (navigator.serviceWorker.controller) {
+                  navigator.serviceWorker.controller.postMessage({type: 'SKIP_WAITING'});
+                }
+              });
             `,
           }}
         />

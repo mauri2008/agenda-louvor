@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Music, Users, Mic, Clock, Guitar, Drum, Piano, Guitar as Bass, Plus, ExternalLink, Search, X, Loader2 } from "lucide-react";
+import { Calendar, Music, Users, Mic, Clock, Guitar, Drum, Piano, Guitar as Bass, Plus, ExternalLink, Search, X, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { useAgendaData } from "@/hooks/useAgendaData";
 import { Culto } from "@/types/database";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import UpdateNotification from "@/components/UpdateNotification";
 
 // Função para obter o ícone do instrumento
 const getInstrumentIcon = (instrumento: string) => {
@@ -28,8 +29,15 @@ const getInstrumentIcon = (instrumento: string) => {
 };
 
 export default function Home() {
-  const { cultos, loading, error } = useAgendaData();
+  const { cultos, loading, error, fetchCultosFuturos } = useAgendaData();
   const [searchTerm, setSearchTerm] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchCultosFuturos();
+    setRefreshing(false);
+  };
 
   // Função para filtrar cultos baseado no termo de busca
   const filteredCultos = useMemo(() => {
@@ -80,8 +88,17 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right side - Action button */}
-          <div>
+          {/* Right side - Action buttons */}
+          <div className="flex items-center gap-3">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
             <Link href="/novo-culto">
               <Button
                 size="lg"
@@ -357,6 +374,9 @@ export default function Home() {
       
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+      
+      {/* Update Notification */}
+      <UpdateNotification />
     </div>
   );
 }
