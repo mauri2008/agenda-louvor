@@ -28,13 +28,15 @@ const getInstrumentIcon = (instrumento: string) => {
 };
 
 export default function Home() {
-  const { cultos, loading, error, fetchCultosFuturos } = useAgendaData();
+  const { cultos, loading, error, refreshAllData } = useAgendaData();
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchCultosFuturos();
+    console.log('🔄 Refresh manual iniciado...');
+    await refreshAllData();
+    console.log('✅ Refresh manual concluído');
     setRefreshing(false);
   };
 

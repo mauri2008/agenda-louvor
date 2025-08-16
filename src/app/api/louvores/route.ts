@@ -17,12 +17,26 @@ export async function GET(request: NextRequest) {
       louvores = await louvoresService.getAtivos();
     }
 
-    return NextResponse.json(louvores);
+    return NextResponse.json(louvores, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Last-Modified': new Date().toUTCString(),
+      },
+    });
   } catch (error) {
     console.error('Erro ao buscar louvores:', error);
     return NextResponse.json(
       { success: false, message: 'Erro ao buscar louvores' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 }
@@ -47,13 +61,26 @@ export async function POST(request: NextRequest) {
       success: true, 
       message: 'Louvor salvo com sucesso!',
       louvor: louvorSalvo 
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
     
   } catch (error) {
     console.error('Erro ao salvar louvor:', error);
     return NextResponse.json(
       { success: false, message: 'Erro ao salvar louvor' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 }

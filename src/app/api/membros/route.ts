@@ -32,12 +32,26 @@ export async function GET(request: NextRequest) {
       const musicos = await membrosService.getMusicos();
       membros = { cantores, musicos };
     }
-    return NextResponse.json(membros);
+    return NextResponse.json(membros, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Last-Modified': new Date().toUTCString(),
+      },
+    });
   } catch (error) {
     console.error('Erro ao buscar membros:', error);
     return NextResponse.json(
       { success: false, message: 'Erro ao buscar membros' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 }
@@ -67,13 +81,26 @@ export async function POST(request: NextRequest) {
       success: true, 
       message: `${tipo === 'cantor' ? 'Cantor' : 'Músico'} salvo com sucesso!`,
       membro: membroSalvo 
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
     
   } catch (error) {
     console.error('Erro ao salvar membro:', error);
     return NextResponse.json(
       { success: false, message: 'Erro ao salvar membro' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 }

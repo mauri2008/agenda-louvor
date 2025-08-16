@@ -75,13 +75,26 @@ export async function POST(request: NextRequest) {
       success: true, 
       message: 'Culto salvo com sucesso!',
       culto: cultoSalvo 
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
     
   } catch (error) {
     console.error('Erro ao salvar culto:', error);
     return NextResponse.json(
       { success: false, message: 'Erro ao salvar culto' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 }
@@ -89,12 +102,26 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const cultos = await cultosService.getAll();
-    return NextResponse.json(cultos);
+    return NextResponse.json(cultos, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Last-Modified': new Date().toUTCString(),
+      },
+    });
   } catch (error) {
     console.error('Erro ao ler cultos:', error);
     return NextResponse.json(
       { success: false, message: 'Erro ao ler cultos' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 } 

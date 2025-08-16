@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,7 @@ export default function EventosPage() {
   const statusOptions = ["ativo", "inativo"];
 
   // Eventos padrão que serão criados automaticamente se não existirem
-  const eventosPadrao = [
+  const eventosPadrao = useMemo(() => [
     { nome: "Culto de Domingo", descricao: "Culto principal de domingo", categoria: "Culto" },
     { nome: "Culto de Terça", descricao: "Culto de oração de terça-feira", categoria: "Culto" },
     { nome: "Culto de Quinta", descricao: "Culto de quinta-feira", categoria: "Culto" },
@@ -53,7 +53,7 @@ export default function EventosPage() {
     { nome: "Batismo", descricao: "Cerimônia de batismo", categoria: "Batismo" },
     { nome: "Santa Ceia", descricao: "Celebração da Santa Ceia", categoria: "Santa Ceia" },
     { nome: "Evangelismo", descricao: "Ação evangelística", categoria: "Evangelismo" }
-  ];
+  ], []);
 
   useEffect(() => {
     const fetchEventos = async () => {

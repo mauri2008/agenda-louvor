@@ -1,56 +1,65 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, X } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 
-export default function UpdateNotification() {
-  const [showUpdate, setShowUpdate] = useState(false);
+interface UpdateNotificationProps {
+  message?: string;
+  duration?: number;
+}
+
+export default function UpdateNotification({ 
+  message = "Dados atualizados com sucesso!", 
+  duration = 3000 
+}: UpdateNotificationProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState(message);
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Service Worker foi atualizado
-        setShowUpdate(true);
-      });
-    }
-  }, []);
+    // Listener para eventos de atualização
+    const handleDataUpdate = (event: CustomEvent) => {
+      setNotificationMessage(event.detail.message || message);
+      setIsVisible(true);
+      
+      setTimeout(() => {
+        setIsVisible(false);
+      }, duration);
+    };
 
-  const handleUpdate = () => {
-    window.location.reload();
-  };
+    // Listener para eventos de refresh
+    const handleRefresh = () => {
+      setNotificationMessage("Dados recarregados!");
+      setIsVisible(true);
+      
+      setTimeout(() => {
+        setIsVisible(false);
+      }, duration);
+    };
 
-  const handleDismiss = () => {
-    setShowUpdate(false);
-  };
+    window.addEventListener('data-updated' as any, handleDataUpdate);
+    window.addEventListener('data-refreshed' as any, handleRefresh);
 
-  if (!showUpdate) return null;
+    return () => {
+      window.removeEventListener('data-updated' as any, handleDataUpdate);
+      window.removeEventListener('data-refreshed' as any, handleRefresh);
+    };
+  }, [message, duration]);
+
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed top-4 left-4 right-4 z-50 bg-blue-600 text-white rounded-lg shadow-lg p-4 animate-in slide-in-from-top-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-500 rounded-lg">
-            <RefreshCw className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="font-semibold">
-              Nova versão disponível
-            </h3>
-            <p className="text-sm text-blue-100">
-              Clique para atualizar o aplicativo
+    <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right-2 duration-300">
+      <div className="bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800 rounded-lg shadow-lg p-4 max-w-sm">
+        <div className="flex items-start gap-3">
+          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+              {notificationMessage}
             </p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
           <button
-            onClick={handleUpdate}
-            className="px-4 py-2 bg-white text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
-          >
-            Atualizar
-          </button>
-          <button
-            onClick={handleDismiss}
-            className="p-2 text-blue-200 hover:text-white transition-colors"
+            onClick={() => setIsVisible(false)}
+            className="text-green-400 hover:text-green-600 dark:hover:text-green-300 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
