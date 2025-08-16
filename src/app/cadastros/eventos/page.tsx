@@ -76,7 +76,7 @@ export default function EventosPage() {
     };
 
     fetchEventos();
-  }, []);
+  }, [eventosPadrao]);
 
   // Filtrar eventos
   const filteredEventos = eventos.filter(evento =>
