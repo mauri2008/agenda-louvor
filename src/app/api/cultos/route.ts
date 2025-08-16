@@ -1,33 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFileSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { cultosService } from '@/lib/services/cultos';
+import { louvoresService } from '@/lib/services/louvores';
+import { membrosService } from '@/lib/services/membros';
+import { Culto } from '@/types/database';
 
 export async function POST(request: NextRequest) {
   try {
     const novoCulto = await request.json();
     
-    // Ler o arquivo JSON atual
-    const dataPath = join(process.cwd(), 'public', 'data', 'agenda-louvores.json');
-    const data = JSON.parse(readFileSync(dataPath, 'utf8'));
-    
-    // Gerar novo ID
-    const novoId = Math.max(...data.cultos.map((culto: { id: number }) => culto.id)) + 1;
-    
-    // Adicionar o novo culto
-    const cultoCompleto = {
-      ...novoCulto,
-      id: novoId
+    // Processar novos louvores, cantores e músicos
+    const novosLouvores = novoCulto.novosLouvores || [];
+    const novosCantores = novoCulto.novosCantores || [];
+    const novosMusicos = novoCulto.novosMusicos || [];
+
+    // Adicionar novos louvores à base de dados
+    for (const louvor of novosLouvores) {
+      try {
+        await louvoresService.create({
+          nome: louvor.nome,
+          tom: louvor.tom,
+          duracao: louvor.duracao,
+          categoria: louvor.categoria,
+          letra: louvor.letra || '',
+          status: 'ativo',
+          link_louvor: louvor.linkLouvor || '',
+          link_cifra: louvor.linkCifra || '',
+          tipo_link: louvor.tipoLink || 'youtube'
+        });
+      } catch (error) {
+        console.error('Erro ao criar louvor:', error);
+      }
+    }
+
+    // Adicionar novos cantores à base de dados
+    for (const cantor of novosCantores) {
+      try {
+        await membrosService.createCantor({
+          nome: cantor.nome,
+          funcao: cantor.funcao
+        });
+      } catch (error) {
+        console.error('Erro ao criar cantor:', error);
+      }
+    }
+
+    // Adicionar novos músicos à base de dados
+    for (const musico of novosMusicos) {
+      try {
+        await membrosService.createMusico({
+          nome: musico.nome,
+          funcao: musico.funcao
+        });
+      } catch (error) {
+        console.error('Erro ao criar músico:', error);
+      }
+    }
+
+    // Preparar dados do culto para salvar
+    const cultoParaSalvar: Omit<Culto, 'id' | 'created_at' | 'updated_at'> = {
+      data: novoCulto.data,
+      dia_semana: novoCulto.diaSemana,
+      horario: novoCulto.horario,
+      tipo: novoCulto.tipo,
+      status: novoCulto.status,
+      cantores: novoCulto.cantores,
+      banda: novoCulto.banda,
+      louvores: novoCulto.louvores
     };
-    
-    data.cultos.push(cultoCompleto);
-    
-    // Salvar no arquivo
-    writeFileSync(dataPath, JSON.stringify(data, null, 4), 'utf8');
+
+    // Salvar o culto no Supabase
+    const cultoSalvo = await cultosService.create(cultoParaSalvar);
     
     return NextResponse.json({ 
       success: true, 
       message: 'Culto salvo com sucesso!',
-      culto: cultoCompleto 
+      culto: cultoSalvo 
     });
     
   } catch (error) {
@@ -41,10 +88,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const dataPath = join(process.cwd(), 'public', 'data', 'agenda-louvores.json');
-    const data = JSON.parse(readFileSync(dataPath, 'utf8'));
-    
-    return NextResponse.json(data.cultos);
+    const cultos = await cultosService.getAll();
+    return NextResponse.json(cultos);
   } catch (error) {
     console.error('Erro ao ler cultos:', error);
     return NextResponse.json(

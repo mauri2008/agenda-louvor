@@ -4,10 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Music, Users, Mic, Clock, Guitar, Drum, Piano, Guitar as Bass, Plus, ExternalLink, Search, X } from "lucide-react";
-import dadosAgenda from "../../public/data/agenda-louvores.json";
+import { Calendar, Music, Users, Mic, Clock, Guitar, Drum, Piano, Guitar as Bass, Plus, ExternalLink, Search, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo } from "react";
+import { useAgendaData } from "@/hooks/useAgendaData";
+import { Culto } from "@/types/database";
 
 // Função para obter o ícone do instrumento
 const getInstrumentIcon = (instrumento: string) => {
@@ -25,36 +26,17 @@ const getInstrumentIcon = (instrumento: string) => {
   }
 };
 
-// Função para filtrar cultos futuros
-const getCultosFuturos = () => {
-  const hoje = new Date();
-  const mesAtual = hoje.getMonth();
-  const anoAtual = hoje.getFullYear();
-
-  return dadosAgenda.cultos.filter(culto => {
-    const dataCulto = new Date(culto.data);
-    const dataCultoMes = dataCulto.getMonth();
-    const dataCultoAno = dataCulto.getFullYear();
-
-    // Mostrar cultos do mês atual em diante
-    if (dataCultoAno > anoAtual) return true;
-    if (dataCultoAno === anoAtual && dataCultoMes >= mesAtual) return true;
-
-    return false;
-  }).sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
-};
-
 export default function Home() {
-  const cultosFuturos = getCultosFuturos();
+  const { cultos, loading, error } = useAgendaData();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Função para filtrar cultos baseado no termo de busca
   const filteredCultos = useMemo(() => {
-    if (!searchTerm.trim()) return cultosFuturos;
+    if (!searchTerm.trim()) return cultos;
 
     const term = searchTerm.toLowerCase().trim();
 
-    return cultosFuturos.filter(culto => {
+    return cultos.filter(culto => {
       // Buscar por nome dos cantores
       const cantoresMatch = culto.cantores.some(cantor =>
         cantor.nome.toLowerCase().includes(term)
@@ -72,7 +54,7 @@ export default function Home() {
 
       return cantoresMatch || musicosMatch || louvoresMatch;
     });
-  }, [cultosFuturos, searchTerm]);
+  }, [cultos, searchTerm]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
@@ -144,8 +126,41 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-4">
+              Carregando cultos...
+            </h3>
+            <p className="text-muted-foreground text-lg">
+              Aguarde enquanto buscamos os dados do banco de dados.
+            </p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/10 rounded-full mb-6">
+              <X className="h-8 w-8 text-red-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-4">
+              Erro ao carregar dados
+            </h3>
+            <p className="text-muted-foreground text-lg mb-8">
+              {error}
+            </p>
+            <Button onClick={() => window.location.reload()} size="lg">
+              Tentar Novamente
+            </Button>
+          </div>
+        )}
+
         {/* Lista de Cards */}
-        {filteredCultos.length > 0 ? (
+        {!loading && !error && filteredCultos.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredCultos.map((culto) => (
               <Card key={culto.id} className="group hover:shadow-2xl duration-500 border-border/50 hover:border-primary/40 bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm shadow-lg hover:shadow-2xl">
@@ -291,7 +306,7 @@ export default function Home() {
               </Card>
             ))}
           </div>
-        ) : (
+        ) : !loading && !error ? (
           <div className="text-center py-16">
             <div className="relative mb-8">
               <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-muted to-muted/50 rounded-full shadow-lg">
@@ -322,18 +337,18 @@ export default function Home() {
               </Link>
             )}
           </div>
-        )}
+        ) : null}
 
         {/* Footer */}
         <footer className="text-center mt-20 pt-12 border-t border-border/50">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">{dadosAgenda.configuracoes.igreja.nome}</span>
+              <span className="text-sm font-medium">Agenda de Louvores</span>
               <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
             </div>
             <p className="text-muted-foreground text-sm">
-              Agenda de Louvores - Sistema de Gerenciamento
+              Sistema de Gerenciamento - Powered by Supabase
             </p>
           </div>
         </footer>

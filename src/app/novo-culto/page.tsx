@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Music, Users, Mic, Plus, X, Save, Search, Check, ArrowLeft } from "lucide-react";
-import dadosAgenda from "../../../public/data/agenda-louvores.json";
+import { useAgendaData } from "@/hooks/useAgendaData";
 
 interface Cantor {
     id: number;
@@ -49,6 +49,8 @@ interface FormData {
 }
 
 export default function NovoCulto() {
+    const { louvores, cantores, musicos, searchLouvores, searchCantores, searchMusicos } = useAgendaData();
+    
     const [formData, setFormData] = useState<FormData>({
         data: "",
         diaSemana: "",
@@ -103,44 +105,35 @@ export default function NovoCulto() {
     ];
 
     // Função para buscar louvores na base de dados
-    const buscarLouvores = (termo: string) => {
+    const buscarLouvores = async (termo: string) => {
         if (!termo.trim()) {
             setSuggestions([]);
             return;
         }
 
-        const louvoresExistentes = dadosAgenda.louvores || [];
-        const resultados = louvoresExistentes.filter(louvor =>
-            louvor.nome.toLowerCase().includes(termo.toLowerCase())
-        );
+        const resultados = await searchLouvores(termo);
         setSuggestions(resultados);
     };
 
     // Função para buscar cantores na base de dados
-    const buscarCantores = (termo: string) => {
+    const buscarCantores = async (termo: string) => {
         if (!termo.trim()) {
             setSuggestionsCantor([]);
             return;
         }
 
-        const cantoresExistentes = dadosAgenda.membros?.cantores || [];
-        const resultados = cantoresExistentes.filter(cantor =>
-            cantor.nome.toLowerCase().includes(termo.toLowerCase())
-        );
+        const resultados = await searchCantores(termo);
         setSuggestionsCantor(resultados);
     };
 
     // Função para buscar músicos na base de dados
-    const buscarMusicos = (termo: string) => {
+    const buscarMusicos = async (termo: string) => {
         if (!termo.trim()) {
             setSuggestionsMusico([]);
             return;
         }
 
-        const musicosExistentes = dadosAgenda.membros?.musicos || [];
-        const resultados = musicosExistentes.filter(musico =>
-            musico.nome.toLowerCase().includes(termo.toLowerCase())
-        );
+        const resultados = await searchMusicos(termo);
         setSuggestionsMusico(resultados);
     };
 
@@ -186,12 +179,12 @@ export default function NovoCulto() {
     };
 
     // Função para lidar com mudanças no campo de busca
-    const handleSearchChange = (value: string) => {
+    const handleSearchChange = async (value: string) => {
         setSearchTerm(value);
         setNovoLouvor(prev => ({ ...prev, nome: value }));
 
         if (value.trim()) {
-            buscarLouvores(value);
+            await buscarLouvores(value);
             setShowSuggestions(true);
         } else {
             setShowSuggestions(false);
@@ -200,12 +193,12 @@ export default function NovoCulto() {
     };
 
     // Função para lidar com mudanças no campo de busca de cantores
-    const handleSearchChangeCantor = (value: string) => {
+    const handleSearchChangeCantor = async (value: string) => {
         setSearchTermCantor(value);
         setNovoCantor(prev => ({ ...prev, nome: value }));
 
         if (value.trim()) {
-            buscarCantores(value);
+            await buscarCantores(value);
             setShowSuggestionsCantor(true);
         } else {
             setShowSuggestionsCantor(false);
@@ -214,12 +207,12 @@ export default function NovoCulto() {
     };
 
     // Função para lidar com mudanças no campo de busca de músicos
-    const handleSearchChangeMusico = (value: string) => {
+    const handleSearchChangeMusico = async (value: string) => {
         setSearchTermMusico(value);
         setNovoInstrumento(prev => ({ ...prev, musico: value }));
 
         if (value.trim()) {
-            buscarMusicos(value);
+            await buscarMusicos(value);
             setShowSuggestionsMusico(true);
         } else {
             setShowSuggestionsMusico(false);
@@ -318,7 +311,7 @@ export default function NovoCulto() {
     const adicionarLouvor = () => {
         if (novoLouvor.nome && novoLouvor.tom) {
             // Se o louvor não existe na base, criar um novo
-            const louvorExistente = dadosAgenda.louvores?.find(
+            const louvorExistente = louvores.find(
                 l => l.nome.toLowerCase() === novoLouvor.nome.toLowerCase()
             );
 
@@ -330,25 +323,6 @@ export default function NovoCulto() {
                     letra: "",
                     status: "ativo"
                 };
-
-            // Se o louvor não existe, adicionar à base de dados
-            if (!louvorExistente) {
-                const novoLouvorParaBase = {
-                    id: Date.now(),
-                    nome: novoLouvor.nome,
-                    tom: novoLouvor.tom,
-                    duracao: novoLouvor.duracao,
-                    categoria: novoLouvor.categoria,
-                    letra: "",
-                    status: "ativo",
-                    linkLouvor: novoLouvor.linkLouvor || "",
-                    linkCifra: novoLouvor.linkCifra || "",
-                    tipoLink: novoLouvor.tipoLink || "youtube"
-                };
-
-                // Adicionar à base de dados (simulado)
-                console.log("Novo louvor adicionado à base:", novoLouvorParaBase);
-            }
 
             setFormData(prev => ({
                 ...prev,
@@ -375,25 +349,13 @@ export default function NovoCulto() {
     const adicionarCantor = () => {
         if (novoCantor.nome.trim()) {
             // Se o cantor não existe na base, criar um novo
-            const cantorExistente = dadosAgenda.membros?.cantores?.find(
+            const cantorExistente = cantores.find(
                 c => c.nome.toLowerCase() === novoCantor.nome.toLowerCase()
             );
 
             const cantorParaAdicionar = cantorExistente
                 ? { ...cantorExistente, id: Date.now() }
                 : { ...novoCantor, id: Date.now() };
-
-            // Se o cantor não existe, adicionar à base de dados
-            if (!cantorExistente) {
-                const novoCantorParaBase = {
-                    id: Date.now(),
-                    nome: novoCantor.nome,
-                    funcao: novoCantor.funcao
-                };
-
-                // Adicionar à base de dados (simulado)
-                console.log("Novo cantor adicionado à base:", novoCantorParaBase);
-            }
 
             setFormData(prev => ({
                 ...prev,
@@ -417,7 +379,7 @@ export default function NovoCulto() {
     const adicionarInstrumento = () => {
         if (novoInstrumento.instrumento && novoInstrumento.musico) {
             // Se o músico não existe na base, criar um novo
-            const musicoExistente = dadosAgenda.membros?.musicos?.find(
+            const musicoExistente = musicos.find(
                 m => m.nome.toLowerCase() === novoInstrumento.musico.toLowerCase()
             );
 
@@ -426,18 +388,6 @@ export default function NovoCulto() {
                 instrumento: novoInstrumento.instrumento,
                 musico: novoInstrumento.musico
             };
-
-            // Se o músico não existe, adicionar à base de dados
-            if (!musicoExistente) {
-                const novoMusicoParaBase = {
-                    id: Date.now(),
-                    nome: novoInstrumento.musico,
-                    funcao: novoInstrumento.instrumento
-                };
-
-                // Adicionar à base de dados (simulado)
-                console.log("Novo músico adicionado à base:", novoMusicoParaBase);
-            }
 
             setFormData(prev => ({
                 ...prev,
@@ -488,7 +438,7 @@ export default function NovoCulto() {
 
             // Verificar louvores novos
             formData.louvores.forEach(louvor => {
-                const louvorExistente = dadosAgenda.louvores?.find(
+                const louvorExistente = louvores.find(
                     l => l.nome.toLowerCase() === louvor.nome.toLowerCase()
                 );
                 if (!louvorExistente) {
@@ -507,7 +457,7 @@ export default function NovoCulto() {
 
             // Verificar cantores novos
             formData.cantores.forEach(cantor => {
-                const cantorExistente = dadosAgenda.membros?.cantores?.find(
+                const cantorExistente = cantores.find(
                     c => c.nome.toLowerCase() === cantor.nome.toLowerCase()
                 );
                 if (!cantorExistente) {
@@ -521,7 +471,7 @@ export default function NovoCulto() {
 
             // Verificar músicos novos
             formData.banda.instrumentos.forEach(instrumento => {
-                const musicoExistente = dadosAgenda.membros?.musicos?.find(
+                const musicoExistente = musicos.find(
                     m => m.nome.toLowerCase() === instrumento.musico.toLowerCase()
                 );
                 if (!musicoExistente) {
