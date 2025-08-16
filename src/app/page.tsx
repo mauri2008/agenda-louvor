@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import { useAgendaData } from "@/hooks/useAgendaData";
 import { Culto } from "@/types/database";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 // Função para obter o ícone do instrumento
 const getInstrumentIcon = (instrumento: string) => {
@@ -353,6 +354,9 @@ export default function Home() {
           </div>
         </footer>
       </div>
+      
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 }
