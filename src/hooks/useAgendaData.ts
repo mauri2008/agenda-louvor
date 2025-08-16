@@ -171,11 +171,11 @@ export const useAgendaData = () => {
 
     loadData();
 
-    // Refresh automático a cada 10 segundos (mais agressivo)
+    // Refresh automático a cada 15 minutos
     const interval = setInterval(() => {
-      console.log('⏰ Refresh automático...');
+      console.log('⏰ Refresh automático (15min)...');
       fetchCultosFuturos();
-    }, 10000);
+    }, 900000); // 15 minutos = 900.000 ms
 
     // Refresh quando a página ganha foco (útil para PWA)
     const handleFocus = () => {
