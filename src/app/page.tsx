@@ -8,7 +8,6 @@ import { Calendar, Music, Users, Mic, Clock, Guitar, Drum, Piano, Guitar as Bass
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { useAgendaData } from "@/hooks/useAgendaData";
-import { Culto } from "@/types/database";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import UpdateNotification from "@/components/UpdateNotification";
 
@@ -334,7 +333,6 @@ export default function Home() {
                               Tom: {louvor.tom}
                             </Badge>
                             <div className="flex gap-2">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- O tipo do louvor pode variar dependendo da fonte dos dados */}
                               {(louvor as any).linkLouvor && (
                                 <Button
                                   size="sm"
@@ -346,7 +344,6 @@ export default function Home() {
                                   <ExternalLink className="h-4 w-4" />
                                 </Button>
                               )}
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- O tipo do louvor pode variar dependendo da fonte dos dados */}
                               {(louvor as any).linkCifra && (
                                 <Button
                                   size="sm"

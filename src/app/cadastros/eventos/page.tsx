@@ -55,27 +55,26 @@ export default function EventosPage() {
     { nome: "Evangelismo", descricao: "Ação evangelística", categoria: "Evangelismo" }
   ];
 
-  // Carregar eventos
-  const fetchEventos = async () => {
-    try {
-      setLoading(true);
-      // Por enquanto, vamos simular os eventos padrão
-      // Em uma implementação real, você teria uma API para eventos
-      setEventos(eventosPadrao.map((evento, index) => ({
-        id: index + 1,
-        nome: evento.nome,
-        descricao: evento.descricao,
-        categoria: evento.categoria,
-        status: "ativo"
-      })));
-    } catch (error) {
-      console.error('Erro:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        setLoading(true);
+        // Por enquanto, vamos simular os eventos padrão
+        // Em uma implementação real, você teria uma API para eventos
+        setEventos(eventosPadrao.map((evento, index) => ({
+          id: index + 1,
+          nome: evento.nome,
+          descricao: evento.descricao,
+          categoria: evento.categoria,
+          status: "ativo"
+        })));
+      } catch (error) {
+        console.error('Erro:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchEventos();
   }, []);
 

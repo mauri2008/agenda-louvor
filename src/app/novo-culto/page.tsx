@@ -49,7 +49,7 @@ interface FormData {
 }
 
 export default function NovoCulto() {
-    const { louvores, cantores, musicos, searchLouvores, searchCantores, searchMusicos } = useAgendaData();
+    const {  searchLouvores, searchCantores, searchMusicos } = useAgendaData();
     const [isClient, setIsClient] = useState(false);
     
     const [formData, setFormData] = useState<FormData>(() => ({
@@ -96,14 +96,9 @@ export default function NovoCulto() {
     const [instrumentoIdCounter, setInstrumentoIdCounter] = useState(1);
 
     const instrumentosDisponiveis = ["Guitarra", "Bateria", "Violão 1", "Violão 2", "Teclado", "Contra Baixo"];
-    const categorias = ["Adoração", "Louvor", "Hino"];
-    const funcoesCantor = ["Vocal Principal", "Back Vocal"];
 
-    const tiposLink = [
-        { value: "youtube", label: "YouTube", icon: "🎵" },
-        { value: "spotify", label: "Spotify", icon: "🎧" },
-        { value: "deezer", label: "Deezer", icon: "🎼" }
-    ];
+
+
 
     // Função para buscar louvores na base de dados
     const buscarLouvores = async (termo: string) => {
@@ -473,7 +468,7 @@ export default function NovoCulto() {
                         </p>
                         <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
                             <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
-                                💡 <strong>Dica:</strong> Primeiro cadastre cantores, músicos e louvores na seção "Cadastros" 
+                                💡 <strong>Dica:</strong> Primeiro cadastre cantores, músicos e louvores na seção &quot;Cadastros&quot; 
                                 para facilitar a criação de cultos.
                             </p>
                         </div>
